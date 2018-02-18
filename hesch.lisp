@@ -16,8 +16,8 @@
 
 (defstruct rect
   (origin #C(0 0))
-  (vert 1)
   (horiz 1)
+  (vert 1)
   (rot 0))
 
 (defstruct image
@@ -68,6 +68,15 @@
        (map-g #'render-rects *verts*
 	      :tex (image-tex image)
 	      :modelm (rect-to-m4 (image-rect image))))
+  (swap))
+
+(defun flush-to-screen ()
+  (clear)
+  (do ((image (pop *images*) (pop *images*)))
+      ((null image))
+    (map-g #'render-rects *verts*
+	   :tex (image-tex image)
+	   :modelm (rect-to-m4 (image-rect image))))
   (swap))
 
 (defun draw-to-texture (texture)
@@ -127,14 +136,14 @@
 	     (make-rect :origin
 			(complex (realpart (rect-origin rect))
 				 (imagpart (rect-origin rect)))
-			:horiz (rect-horiz rect)
+                        :horiz (rect-horiz rect)
 			:vert (* a (rect-vert rect))))
     (funcall p2
 	     (make-rect :origin
 			(complex (realpart (rect-origin rect))
 				 (+ (imagpart (rect-origin rect))
 				    (* a (rect-vert rect))))
-			:horiz (rect-horiz rect)
+                        :horiz (rect-horiz rect)
 			:vert (* (- 1 a) (rect-vert rect))))))
 
 (defun grot (p1 a)
