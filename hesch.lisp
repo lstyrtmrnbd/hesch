@@ -148,53 +148,38 @@
   "Places two pictures besides each other at a normalized scaling value of a"
   (lambda (rect)
     (funcall p1
-	     (make-rect (v:x (origin rect))
-			(v:y (origin rect))
-			(* a (horiz rect))
-			(vert rect)))
+	     (make-rect :origin
+			(complex (realpart (origin-rect rect))
+				 (imagpart (origin-rect rect)))
+			:horiz (* a (horiz-rect rect))
+			:vert (vert-rect rect)))
     (funcall p2
-	     (make-rect (+ (v:x (origin rect))
-			   (* a (horiz rect)))
-			(v:y (origin rect))
-			(* (- 1 a) (horiz rect))
-			(vert rect)))))
+	     (make-rect :origin
+			(complex (+ (realpart (origin-rect rect))
+				    (* a (horiz-rect rect)))
+				 (imagpart (origin-rect rect)))
+			:horiz (* (- 1 a) (horiz-rect rect))
+			:vert (vert-rect rect)))))
 
 (defun above (p1 p2 a)
   "Places one picture above another according to normalized scaling value a"
   (lambda (rect)
     (funcall p1
-	     (make-rect (v:x (origin rect))
-			(v:y (origin rect))
-			(horiz rect)
-			(* a (vert rect))))
+	     (make-rect :origin
+			(complex (realpart (origin-rect rect))
+				 (imagpart (origin-rect rect)))
+			:horiz (horiz-rect rect)
+			:vert (* a (vert-rect rect))))
     (funcall p2
-	     (make-rect (v:x (origin rect))
-			(+ (v:y (origin rect))
-			   (* a (vert rect)))
-			(horiz rect)
-			(* (- 1 a) (vert rect))))))
+	     (make-rect :origin
+			(complex (realpart (origin-rect rect))
+				 (+ (imagpart (origin-rect rect))
+				    (* a (vert-rect rect))))
+			:horiz (horiz-rect rect)
+			:vert (* (- 1 a) (vert-rect rect))))))
 
 (defun grot (p1 a)
   "General anti-clockwise rotation by a"
-  (lambda (rect)
-    (funcall p1 (make-rect (v:x (origin rect))
-			   (v:y (origin rect))
-			   (horiz rect)
-			   (vert rect)
-			   a))))
-
-(defun rot (p1)
-  "A 90 degree anti-clockwise rotation"
-  (lambda (rect)
-    (funcall p1 (make-rect (+ (v:x (origin rect))
-			      (horiz rect))
-			   (v:y (origin rect))
-			   (horiz rect)
-			   (vert rect)
-			   (/ pi 2)))))
-
-(defun nrot (p1)
-  "Rot function via new rect struct"
   (lambda (rect)
     (funcall p1
 	     (make-rect :origin
@@ -202,7 +187,12 @@
 				 (imagpart (rect-origin rect)))
 			:horiz (rect-horiz rect)
 			:vert (rect-vert rect)
-			:rot (+ (rect-rot rect) (/ pi 2))))))
+			:rot (+ (rect-rot rect) a)))))
+
+(defun rot (p1)
+  "90 degree anti-clockwise rotation"
+  (grot p1 (/ pi 2)))
+
 ;;Combinations----
 
 
