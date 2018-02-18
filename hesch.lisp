@@ -11,7 +11,6 @@
 (defvar *modelm* nil) ;model->world matrix
 (defvar *viewm* nil)  ;world->cam matrix
 (defvar *projm* nil)  ;cam->clip matrix
-(defvar *pics* nil)   ;list of pictures to render
 (defvar *images* nil) ;list of images to render
 (defvar *default-fbo* nil)
 
@@ -40,6 +39,7 @@
 		       :dimensions 6 :element-type 'g-pt))))
 
 ;;; Pipeline---
+
 (defun-g hesch-vert ((vert g-pt)
 		     &uniform (modelm :mat4)
 		     (viewm :mat4))
@@ -53,6 +53,8 @@
 (defpipeline-g render-rects ()
   (hesch-vert g-pt)
   (hesch-frag :vec2))
+
+;;;Draw commands---
 
 (defun draw-tex ()
   (clear)
@@ -99,41 +101,41 @@
 	   :tex tex
 	   :modelm (rect-to-m4 rect))))
 
-;;Henderson's Basic Operations----
+;;;Henderson's Basic Operations---
 
 (defun beside (p1 p2 a)
   "Places two pictures besides each other at a normalized scaling value of a"
   (lambda (rect)
     (funcall p1
 	     (make-rect :origin
-			(complex (realpart (origin-rect rect))
-				 (imagpart (origin-rect rect)))
-			:horiz (* a (horiz-rect rect))
-			:vert (vert-rect rect)))
+			(complex (realpart (rect-origin rect))
+				 (imagpart (rect-origin rect)))
+			:horiz (* a (rect-horiz rect))
+			:vert (rect-vert rect)))
     (funcall p2
 	     (make-rect :origin
-			(complex (+ (realpart (origin-rect rect))
-				    (* a (horiz-rect rect)))
-				 (imagpart (origin-rect rect)))
-			:horiz (* (- 1 a) (horiz-rect rect))
-			:vert (vert-rect rect)))))
+			(complex (+ (realpart (rect-origin rect))
+				    (* a (rect-horiz rect)))
+				 (imagpart (rect-origin rect)))
+			:horiz (* (- 1 a) (rect-horiz rect))
+			:vert (rect-vert rect)))))
 
 (defun above (p1 p2 a)
   "Places one picture above another according to normalized scaling value a"
   (lambda (rect)
     (funcall p1
 	     (make-rect :origin
-			(complex (realpart (origin-rect rect))
-				 (imagpart (origin-rect rect)))
-			:horiz (horiz-rect rect)
-			:vert (* a (vert-rect rect))))
+			(complex (realpart (rect-origin rect))
+				 (imagpart (rect-origin rect)))
+			:horiz (rect-horiz rect)
+			:vert (* a (rect-vert rect))))
     (funcall p2
 	     (make-rect :origin
-			(complex (realpart (origin-rect rect))
-				 (+ (imagpart (origin-rect rect))
-				    (* a (vert-rect rect))))
-			:horiz (horiz-rect rect)
-			:vert (* (- 1 a) (vert-rect rect))))))
+			(complex (realpart (rect-origin rect))
+				 (+ (imagpart (rect-origin rect))
+				    (* a (rect-vert rect))))
+			:horiz (rect-horiz rect)
+			:vert (* (- 1 a) (rect-vert rect))))))
 
 (defun grot (p1 a)
   "General anti-clockwise rotation by a"
