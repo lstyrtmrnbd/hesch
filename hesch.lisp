@@ -54,21 +54,13 @@
   (hesch-vert g-pt)
   (hesch-frag :vec2))
 
-(defun draw ()
+(defun draw-tex ()
   (clear)
   (map-g #'render-rects *verts*
 	 :tex *tex* :modelm *modelm*)
   (swap))
 
-(defun draw-screen ()
-  (clear)
-  (loop for picture in *pics* do
-       (map-g #'render-rects *verts*
-	      :tex (cdr picture)
-	      :modelm (car picture)))
-  (swap))
-
-(defun draw-images ()
+(defun draw-to-screen ()
   (clear)
   (loop for image in *images* do
        (map-g #'render-rects *verts*
@@ -76,18 +68,10 @@
 	      :modelm (rect-to-m4 (image-rect image))))
   (swap))
 
-(defun draw-texture (texture)
+(defun draw-to-texture (texture)
   )
 
-;;measurements are ostensibly provided in world coords,
-;;because this is effectively the model matrix
-(defun old-rect (x y w h &optional angle)
-  "Makes a matrix that will (optionally rotate) scale then translate the standard square to the size and origin provided"
-  (m4:* (m4:translation (v! x y 0))
-	(if (null angle)
-	    (m4:identity)
-	    (m4:rotation-z (coerce angle 'single-float)))
-	(m4:scale (v! w h 0))))
+;;Rect measurements are in world coords, they will construct the model matrix
 
 (defun rect-to-m4 (rect)
   "Scale, translate middle to origin, rotate, translate back, translate"
@@ -101,46 +85,19 @@
 	  (m4:translation (v! (- (/ w 2)) (- (/ h 2)) 0)) ;To
 	  (m4:scale (v! w h 0)))))
 
-;;selectors
-#||
-(defun origin (rect)
-  (m4:*v rect
-	 (v! 0 0 0 1)))
+;;A picture is a function of rect, it encloses a texture to draw into a rectangle
 
-(defun vert (rect)
-  (v:y (m4:*v rect
-	      (v! 1 1 1 0))))
-
-(defun horiz (rect)
-  (v:x (m4:*v rect
-	      (v! 1 1 1 0))))
-||#
-
-;;picture is a function of rect,
-;;it draws a texture into a rectangle
-(defun make-pic0 (tex)
-  "Unfinished constructor that batches draw calls"
+(defun make-pic (tex)
+  "Batches rectangle texture pairs for drawing"
   (lambda (rect)
-    (cons rect tex)))
+    (push (make-image :rect rect :tex tex) *images*)))
 
 (defun make-pic1 (tex)
   "A pic from this constructor issues a draw call for itself"
   (lambda (rect)
     (map-g #'render-rects *verts*
 	   :tex tex
-	   :modelm rect)))
-
-(defun make-pic2 (tex)
-  "A constructor which also returns rect for debugging"
-  (lambda (rect)
-    (map-g #'render-rects *verts*
-	   :tex tex
-	   :modelm rect)
-    rect))
-
-(defun make-pic (tex)
-  (lambda (rect)
-    (push (make-image :rect rect :tex tex) *images*)))
+	   :modelm (rect-to-m4 rect))))
 
 ;;Henderson's Basic Operations----
 
