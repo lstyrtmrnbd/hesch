@@ -120,14 +120,16 @@
 			(complex (realpart (rect-origin rect))
 				 (imagpart (rect-origin rect)))
 			:horiz (* a (rect-horiz rect))
-			:vert (rect-vert rect)))
+			:vert (rect-vert rect)
+			:rot (rect-rot rect)))
     (funcall p2
 	     (make-rect :origin
 			(complex (+ (realpart (rect-origin rect))
 				    (* a (rect-horiz rect)))
 				 (imagpart (rect-origin rect)))
 			:horiz (* (- 1 a) (rect-horiz rect))
-			:vert (rect-vert rect)))))
+			:vert (rect-vert rect)
+			:rot (rect-rot rect)))))
 
 (defun above (p1 p2 a)
   "Places one picture above another according to normalized scaling value a"
@@ -137,14 +139,16 @@
 			(complex (realpart (rect-origin rect))
 				 (imagpart (rect-origin rect)))
                         :horiz (rect-horiz rect)
-			:vert (* a (rect-vert rect))))
+			:vert (* a (rect-vert rect))
+			:rot (rect-rot rect)))
     (funcall p2
 	     (make-rect :origin
 			(complex (realpart (rect-origin rect))
 				 (+ (imagpart (rect-origin rect))
 				    (* a (rect-vert rect))))
                         :horiz (rect-horiz rect)
-			:vert (* (- 1 a) (rect-vert rect))))))
+			:vert (* (- 1 a) (rect-vert rect))
+			:rot (rect-rot rect)))))
 
 (defun grot (p1 a)
   "General anti-clockwise rotation by a"
@@ -160,6 +164,10 @@
 (defun rot (p1)
   "90 degree anti-clockwise rotation"
   (grot p1 (/ pi 2)))
+
+(defun rot45 (p1)
+  "45 degree anti-clockwise rotation and TODO:scaling"
+  (grot p1 (/ pi 4)))
 
 ;;Combinations----
 
