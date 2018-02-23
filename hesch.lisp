@@ -96,10 +96,20 @@
 	  (m4:translation (v! (- (/ w 2)) (- (/ h 2)) 0)) ;To
 	  (m4:scale (v! w h 0)))))
 
+(defun print-m4 (m4)
+  "Pretty print the 4x4 matrix"
+  (loop for i from 0 below 4 do
+       (loop for j from 0 below 4 do
+	    (let ((x (aref m4 (+ j (* i 4)))))
+	      (if (< x 0)
+		  (format t "~S " x)
+		  (format t " ~S " x))))
+       (format t "~%")))
+
 ;;A picture is a function of rect, it encloses a texture to draw into a rectangle
 
 (defun make-pic (tex)
-  "Batches rectangle texture pairs for drawing"
+  "Batches rectangle texture in image for drawing"
   (lambda (rect)
     (push (make-image :rect rect :tex tex) *images*)))
 
@@ -132,7 +142,7 @@
 			:rot (rect-rot rect)))))
 
 (defun above (p1 p2 a)
-  "Places one picture above another according to normalized scaling value a"
+  "Places p2 above p1 according to normalized scaling value a"
   (lambda (rect)
     (funcall p1
 	     (make-rect :origin
@@ -169,6 +179,17 @@
   "45 degree anti-clockwise rotation and TODO:scaling"
   (grot p1 (/ pi 4)))
 
+(defun flip (p1)
+  "If this doesn't work, gonna have to fuck w/UVs"
+  (lambda (rect)
+    (funcall p1
+	     (make-rect :origin
+			(complex (realpart (+ (rect-origin rect)
+					      (rect-horiz rect)))
+				 (imagpart (rect-origin rect)))
+			:horiz (- (rect-horiz rect))
+			:vert (rect-vert rect)
+			:rot (rect-rot rect)))))
 ;;Combinations----
 
 
