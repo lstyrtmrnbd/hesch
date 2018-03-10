@@ -38,6 +38,9 @@
 			 (,(v! 0 1 0) ,(v! 0 1)))
 		       :dimensions 6 :element-type 'g-pt))))
 
+(defun set-texture (filename)
+  (setf *tex* (sample (dirt:load-image-to-texture filename))))
+
 ;;; Pipeline---
 
 (defun-g hesch-vert ((vert g-pt)
@@ -191,5 +194,9 @@
 			:vert (rect-vert rect)
 			:rot (rect-rot rect)))))
 ;;Combinations----
+
+(defun test ()
+  (let ((*tex-path* "/home/userprime/Pictures/cool_garfield.jpg")
+	(mewp (make-pic *tex*)))))
 
 
