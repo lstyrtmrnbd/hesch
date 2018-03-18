@@ -27,7 +27,7 @@
 (defun initialize ()
   (setf *modelm* (m4:identity))
   (setf *viewm* (m4:identity))
-  (setf *tex* (sample (dirt:load-image-to-texture *tex-path*)))
+  (set-texture *tex-path*)
   (setf *verts*
     (make-buffer-stream
        (make-gpu-array `((,(v! 0 1 0) ,(v! 0 1))
@@ -37,6 +37,9 @@
 			 (,(v! 1 1 0) ,(v! 1 1))
 			 (,(v! 0 1 0) ,(v! 0 1)))
 		       :dimensions 6 :element-type 'g-pt))))
+
+(defun set-texture (filename)
+  (setf *tex* (sample (dirt:load-image-to-texture filename))))
 
 ;;; Pipeline---
 
@@ -48,7 +51,7 @@
 
 (defun-g hesch-frag ((tex-coord :vec2)
 		     &uniform (tex :sampler-2d))
-  (* (texture tex tex-coord) (v! 0.25 0.4 0.25 1.0)))
+  (* (texture tex tex-coord) (v! 1 1 1 1)))
 
 (defpipeline-g render-rects ()
   (hesch-vert g-pt)
@@ -191,5 +194,30 @@
 			:vert (rect-vert rect)
 			:rot (rect-rot rect)))))
 ;;Combinations----
+
+(defun quad (p1)
+  (above (beside p1 p1 .5) (beside p1 p1 .5) .5))
+
+(defun test ()
+  (set-texture "/home/userprime/Pictures/cool_garfield.jpg")
+  (let* ((vp (make-viewport '(1024 768)))
+	 (mewp (make-pic *tex*))
+	 (rmewp (rot (rot mewp)))
+	 (bmewp (beside rmewp rmewp .5))
+	 (qmewp (above bmewp bmewp .5))
+	 (45mewp (rot45 mewp))
+	 (qrmewp (quad 45mewp))
+	 (rqrmewp (rot qrmewp))
+	 (qrqrmewp (quad rqrmewp))
+	 (qqqmewp (quad (quad qmewp))))
+    (funcall qqqmewp (make-rect :origin #C(-1 -1)
+			      :horiz 2 :vert 2))
+    (funcall qrqrmewp (make-rect :origin #C (-0.75 -0.75)
+				 :horiz 1.5 :vert 1.5))
+    (funcall qrmewp (make-rect :origin #C(-0.5 -0.5)))
+    (funcall rqrmewp (make-rect :origin #C(-0.25 -0.25)
+				:horiz 0.5 :vert 0.5))
+    (with-viewport vp
+      (flush-to-screen))))
 
 
